@@ -1,0 +1,5 @@
+/PictureFrame/node_modules/
+/PictureFrame/package-lock.json
+/*/bin/
+/*/obj/
+/.idea/

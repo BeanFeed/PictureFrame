@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PictureFrame", "PictureFrame\PictureFrame.csproj", "{29FC313B-2219-4D09-9A1D-035E415DB05F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateServer", "UpdateServer\UpdateServer.csproj", "{F7166797-CE75-401E-8D88-4EA2D3DF429E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateManager", "UpdateManager\UpdateManager.csproj", "{81657098-D93D-489C-B016-DB3DEB4A6893}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29FC313B-2219-4D09-9A1D-035E415DB05F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29FC313B-2219-4D09-9A1D-035E415DB05F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29FC313B-2219-4D09-9A1D-035E415DB05F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29FC313B-2219-4D09-9A1D-035E415DB05F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7166797-CE75-401E-8D88-4EA2D3DF429E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7166797-CE75-401E-8D88-4EA2D3DF429E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7166797-CE75-401E-8D88-4EA2D3DF429E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7166797-CE75-401E-8D88-4EA2D3DF429E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81657098-D93D-489C-B016-DB3DEB4A6893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81657098-D93D-489C-B016-DB3DEB4A6893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81657098-D93D-489C-B016-DB3DEB4A6893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81657098-D93D-489C-B016-DB3DEB4A6893}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

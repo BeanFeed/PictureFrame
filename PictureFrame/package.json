@@ -1,0 +1,14 @@
+{
+  "name": "pictureframe",
+  "scripts": {
+    "css:build": "npx tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/output.css --minify",
+    "css:watch": "npx tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/output.css --minify --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "tailwindcss": "^3.4.14"
+  }
+}
