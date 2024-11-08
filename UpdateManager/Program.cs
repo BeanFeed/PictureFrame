@@ -1,6 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using UpdateManager.Database.Context;
+using UpdateManager.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+var dbContext = new ManagerContext();
+dbContext.Database.Migrate();
+dbContext.Dispose();
+
+builder.Services.AddDbContext<ManagerContext>();
+
+builder.Services.AddScoped<UpdatesService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
