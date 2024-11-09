@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -42,5 +43,23 @@ public class UpdatesService
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task DownloadBuild()
+    {
+        UpdatePreferenceModel? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceModel>(await GetUpdatePreferences());
+        
+        using (var client = new WebClient())
+        {
+            client.DownloadProgressChanged += (sender, args) =>
+            {
+                // Update progress
+            };
+            client.DownloadFileCompleted += (sender, args) =>
+            {
+                // Update progress
+            };
+            await client.DownloadFileTaskAsync($"{preferenceModel.ServerAddress}/api/builds/getbuild?buildNumber={preferenceModel.BuildNumber}", "build.zip");
+        }
     }
 }

@@ -14,6 +14,10 @@ builder.Services.AddDbContext<ManagerContext>();
 
 builder.Services.AddScoped<UpdatesService>();
 
+builder.Services.AddHostedService<DownloadBackgroundService>();
+
+builder.Services.AddSingleton<DownloadQueueSingleston>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

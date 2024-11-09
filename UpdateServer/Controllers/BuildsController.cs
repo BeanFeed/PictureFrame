@@ -4,7 +4,7 @@ using UpdateServer.Services;
 namespace UpdateServer.Controllers;
 
 [ApiController]
-[Route("[controller]/[action]")]
+[Route("api/[controller]/[action]")]
 public class BuildsController : ControllerBase
 {
     private readonly BuildsService _buildsService;

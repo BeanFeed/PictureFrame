@@ -43,4 +43,19 @@ public class UpdatesController : ControllerBase
             return BadRequest(e.Message);
         }
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> StartUpdate(string buildNumber)
+    {
+        try
+        {
+            
+            // Update logic here
+            return Ok("Update Successful.");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
 }
