@@ -7,6 +7,7 @@ public class DownloadQueueSingleston
     private readonly ConcurrentQueue<Action> _tasks = new ConcurrentQueue<Action>();
     private readonly SemaphoreSlim _signal = new SemaphoreSlim(0, 1);
     public int PercentComplete { get; set; } = 0;
+    public string Status { get; set; } = "Idle";
     public void QueueTask(Action task)
     {
         _tasks.Enqueue(task);

@@ -3,7 +3,11 @@ using UpdateManager.Database.Context;
 using UpdateManager.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+if (!Directory.Exists(Path.Join(Environment.CurrentDirectory, "Builds")))
+    Directory.CreateDirectory(Path.Join(Environment.CurrentDirectory, "Builds"));
 
+if (!Directory.Exists(Path.Join(Environment.CurrentDirectory, "WebApp")))
+    Directory.CreateDirectory(Path.Join(Environment.CurrentDirectory, "WebApp"));
 // Add services to the container.
 
 var dbContext = new ManagerContext();

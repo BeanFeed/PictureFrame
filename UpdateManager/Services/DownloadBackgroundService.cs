@@ -19,6 +19,8 @@ public class DownloadBackgroundService : BackgroundService
             try
             {
                 var task = await _taskQueue.DequeueAsync(stoppingToken);
+                _taskQueue.Status = "Downloading";
+                _taskQueue.PercentComplete = 0;
                 task.Invoke();
             }
             catch (OperationCanceledException)
@@ -27,7 +29,7 @@ public class DownloadBackgroundService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error executing background task");
+                _logger.LogError(ex, "Error downloading in background task");
             }
         }
     }

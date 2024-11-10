@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace UpdateServer.Services;
 
 public class BuildsService
@@ -20,10 +22,15 @@ public class BuildsService
         return await File.ReadAllTextAsync(changelogPath);
     }
 
-    public string[] GetBuilds()
+    public async Task<string> GetBuilds()
     {
+        Dictionary<string, string> ret = new Dictionary<string, string>();
         string[] directories = Directory.GetDirectories(Path.Join(Environment.CurrentDirectory, "Builds"));
-        return directories.Where(x => Utils.IsValidBuildNumber(x) && File.Exists(Path.Join(Environment.CurrentDirectory, "Builds", x, "changelog.md"))).ToArray();
+        foreach (var directory in directories)
+        {
+            ret.Add(directory, await GetChangelog(directory));
+        }
+        return JsonSerializer.Serialize(ret);
     }
 
     public async Task<byte[]> GetBuild(string buildNumber)
@@ -32,6 +39,8 @@ public class BuildsService
 
         string[] directories = Directory.GetDirectories(Path.Join(Environment.CurrentDirectory, "Builds"));
         if(!directories.Contains(buildNumber)) throw new Exception("Build not found.");
+
+        if(buildNumber == "latest") buildNumber = GetLatestBuildNumber();
 
         string buildPath = Path.Join(Environment.CurrentDirectory, "Builds", buildNumber, $"{buildNumber}.image");
         if(!File.Exists(buildPath)) throw new Exception("Build Not Found.");

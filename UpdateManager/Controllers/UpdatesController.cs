@@ -43,19 +43,50 @@ public class UpdatesController : ControllerBase
             return BadRequest(e.Message);
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetBuilds()
+    {
+        try
+        {
+            return Ok(await _updatesService.GetBuilds());
+        } catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> IsUpdateAvailable()
+    {
+        try
+        {
+            return Ok(await _updatesService.IsUpdateAvailable());
+        } catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+    }
     
     [HttpPost]
     public async Task<IActionResult> StartUpdate(string buildNumber)
     {
         try
         {
-            
-            // Update logic here
-            return Ok("Update Successful.");
+            await _updatesService.StartUpdate(buildNumber);
+            return Ok("Update Started.");
         }
         catch (Exception e)
         {
             return BadRequest(e.Message);
         }
+    }
+
+    [HttpGet]
+    public IActionResult GetUpdateStatus()
+    {
+        return Ok(_updatesService.GetStatus());
     }
 }
