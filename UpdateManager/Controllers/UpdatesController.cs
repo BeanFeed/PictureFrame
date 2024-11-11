@@ -58,6 +58,20 @@ public class UpdatesController : ControllerBase
     }
 
     [HttpGet]
+    public async Task<IActionResult> GetChangelog(string? buildNumber)
+    {
+        try
+        {
+            if(buildNumber is null) return Ok(await _updatesService.GetChangelog());
+            return Ok(await _updatesService.GetChangelog(buildNumber));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpGet]
     public async Task<IActionResult> IsUpdateAvailable()
     {
         try

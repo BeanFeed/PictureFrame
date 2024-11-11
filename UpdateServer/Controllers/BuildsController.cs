@@ -28,9 +28,9 @@ public class BuildsController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetBuilds()
+    public async Task<IActionResult> GetBuilds()
     {
-        return Ok(_buildsService.GetBuilds());
+        return Ok(await _buildsService.GetBuilds());
     }
 
     [HttpGet]

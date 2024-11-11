@@ -13,11 +13,13 @@ public class UpdatesService
 {
     private readonly ManagerContext _context;
     private readonly DownloadQueueSingleston _downloadQueue;
+    private readonly IHttpClientFactory _clientFactory;
 
-    public UpdatesService(ManagerContext context, DownloadQueueSingleston downloadQueue)
+    public UpdatesService(ManagerContext context, DownloadQueueSingleston downloadQueue, IHttpClientFactory clientFactory)
     {
         _context = context;
         _downloadQueue = downloadQueue;
+        _clientFactory = clientFactory;
     }
 
     public async Task<string> GetUpdatePreferences()
@@ -30,7 +32,7 @@ public class UpdatesService
     public async Task SetUpdatePreferences(UpdatePreferenceModel preferenceModel)
     {
         var configuration = await _context.SystemConfigurations.FirstOrDefaultAsync(x => x.Key == "UpdatePreferences");
-
+        if(preferenceModel.ServerAddress[^1] == '/') preferenceModel.ServerAddress = preferenceModel.ServerAddress.Remove(preferenceModel.ServerAddress.Length - 1);
         if (configuration is null)
         {
             configuration = new SystemConfiguration()
@@ -54,9 +56,9 @@ public class UpdatesService
         if(preferenceModel is null) throw new Exception("Update Preferences Not Found.");
 
 
-        using (var client = new WebClient())
+        using (var client = _clientFactory.CreateClient("UpdateServer"))
         {
-            string? latestBuild = await client.DownloadStringTaskAsync($"{preferenceModel.ServerAddress}/api/builds/getlatestbuildnumber");
+            string? latestBuild = await client.GetStringAsync($"{preferenceModel.ServerAddress}/api/builds/getlatestbuildnumber");
             if(latestBuild is null) throw new Exception("Latest Build Not Found.");
 
             return latestBuild != preferenceModel.BuildNumber;
@@ -77,16 +79,16 @@ public class UpdatesService
         return (status, percent);
     }
 
-    public async Task<Dictionary<string,string>> GetBuilds()
+    public async Task<Dictionary<string,string>?> GetBuilds()
     {
         UpdatePreferenceModel? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceModel>(await GetUpdatePreferences());
         if(preferenceModel is null) throw new Exception("Update Preferences Not Found.");
 
 
-        using (var client = new WebClient())
+        using (var client = _clientFactory.CreateClient("UpdateServer"))
         {
-            string builds = await client.DownloadStringTaskAsync($"{preferenceModel.ServerAddress}/api/builds/getbuilds");
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(builds)!;
+            
+            return await client.GetFromJsonAsync<Dictionary<string,string>>($"{preferenceModel.ServerAddress}/api/builds/getbuilds");
         }
     }
 
@@ -106,24 +108,52 @@ public class UpdatesService
         _downloadQueue.QueueTask(async () => await InstallBuild());
     }
 
+    public async Task<string> GetChangelog(string buildNumber)
+    {
+        UpdatePreferenceModel? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceModel>(await GetUpdatePreferences());
+        if(preferenceModel is null) throw new Exception("Update Preferences Not Found.");
+        
+        using (var client = _clientFactory.CreateClient("UpdateServer"))
+        {
+            string changelog = await client.GetStringAsync($"{preferenceModel.ServerAddress}/api/builds/getchangelog?buildNumber={buildNumber}");
+            return changelog;
+        }
+    }
+
+    public async Task<string> GetChangelog()
+    {
+        UpdatePreferenceModel? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceModel>(await GetUpdatePreferences());
+        if(preferenceModel is null) throw new Exception("Update Preferences Not Found.");
+
+        using (var client = _clientFactory.CreateClient("UpdateServer"))
+        {
+            string changelog = await client.GetStringAsync($"{preferenceModel.ServerAddress}/api/builds/getchangelog?buildNumber={preferenceModel.BuildNumber}");
+            return changelog;
+        }
+    }
+
     private async Task InstallBuild()
     {
         UpdatePreferenceModel? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceModel>(await GetUpdatePreferences());
         if(preferenceModel is null) throw new Exception("Update Preferences Not Found.");
 
-        using (var client = new WebClient())
+        using (var client = _clientFactory.CreateClient("UpdateServer"))
         {
-            client.DownloadProgressChanged += (sender, args) =>
+            var response = await client.GetAsync($"{preferenceModel.ServerAddress}/api/builds/getbuild?buildNumber={preferenceModel.BuildNumber}");
+            response.EnsureSuccessStatusCode();
+
+            long totalContentLength = response.Content.Headers.ContentLength ?? 0;
+            long downloadedBytes = 0;
+            
+            using (var fileStream =
+                   new FileStream(
+                       Path.Join(Environment.CurrentDirectory, "Builds", $"{preferenceModel.BuildNumber}.image"),
+                       FileMode.Create, FileAccess.Write))
             {
-                _downloadQueue.PercentComplete = args.ProgressPercentage;
-                // Update progress
-            };
-            client.DownloadFileCompleted += (sender, args) =>
-            {
-                _downloadQueue.Status = "Complete";
-                // Update progress
-            };
-            await client.DownloadFileTaskAsync(new Uri($"{preferenceModel.ServerAddress}/api/builds/getbuild?buildNumber={preferenceModel.BuildNumber}"), Path.Join(Environment.CurrentDirectory, "Builds", $"{preferenceModel.BuildNumber}.image"));
+                response.Content.CopyToAsync(fileStream);
+
+                ReportProgressAsync(totalContentLength, downloadedBytes);
+            }
         }
 
         //Execute docker load command
@@ -160,5 +190,11 @@ public class UpdatesService
         process.StartInfo = psi;
         process.Start();
         await process.WaitForExitAsync();
+    }
+    
+    private void ReportProgressAsync(long totalContentLength, long downloadedBytes)
+    {
+        double progressPercentage = (downloadedBytes * 100.0 / totalContentLength);
+        _downloadQueue.PercentComplete = (int)progressPercentage;
     }
 }

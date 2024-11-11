@@ -22,6 +22,13 @@ builder.Services.AddHostedService<DownloadBackgroundService>();
 
 builder.Services.AddSingleton<DownloadQueueSingleston>();
 
+builder.Services.AddHttpClient("UpdateServer").ConfigurePrimaryHttpMessageHandler(_ =>
+new HttpClientHandler()
+    {
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+    }
+);
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
