@@ -47,6 +47,8 @@ public class BuildsService
 
     public async Task<byte[]> GetBuild(string buildNumber)
     {
+        if(buildNumber == "latest") buildNumber = GetLatestBuildNumber();
+
         if (!Utils.IsValidBuildNumber(buildNumber)) throw new Exception("Invalid Build Number.");
 
         string[] directories = Directory.GetDirectories(Path.Join(Environment.CurrentDirectory, "Builds"));
@@ -58,7 +60,7 @@ public class BuildsService
         
         if(!directories.Contains(buildNumber)) throw new Exception("Build not found.");
 
-        if(buildNumber == "latest") buildNumber = GetLatestBuildNumber();
+
 
         string buildPath = Path.Join(Environment.CurrentDirectory, "Builds", buildNumber, $"{buildNumber}.image");
         if(!File.Exists(buildPath)) throw new Exception("Build Not Found.");
@@ -79,18 +81,36 @@ public class BuildsService
 
         if(!Utils.IsValidBuildNumber(directories[0])) throw new Exception("Invalid Build Number.");
 
-        DateTime newestBuild = new DateTime();
+        string[] split = directories[0].Split(".");
+
+        DateTime newestBuild = new DateTime(
+            int.Parse(split[2]),
+            int.Parse(split[1]),
+            int.Parse(split[0]),
+            int.Parse(split[3].Substring(0,2)),
+            int.Parse(split[3].Substring(2,2)),
+            0
+            );
+
 
 
         for(int i = 1; i < directories.Length; i++)
         {
-            if(Utils.IsValidBuildNumber(directories[i]))
+            if(Utils.IsValidBuildNumber(directories[i]) )
             {
-                string[] newBuildParts = directories[i].Split('.');
+                split = directories[i].Split(".");
+                DateTime check = new DateTime(
+                    int.Parse(split[2]),
+                    int.Parse(split[1]),
+                    int.Parse(split[0]),
+                    int.Parse(split[3].Substring(0,2)),
+                    int.Parse(split[3].Substring(2,2)),
+                    0
+                );
+                if(check > newestBuild) newestBuild = check;
 
             }
         }
-
-        return "";
+        return newestBuild.ToString("dd.MM.yyyy.HHmm");
     }
 }

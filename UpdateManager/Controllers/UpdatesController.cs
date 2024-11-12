@@ -85,11 +85,12 @@ public class UpdatesController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> StartUpdate(string buildNumber)
+    public async Task<IActionResult> StartUpdate(string? buildNumber)
     {
         try
         {
-            await _updatesService.StartUpdate(buildNumber);
+            if(buildNumber is not null )await _updatesService.StartUpdate(buildNumber);
+            else await _updatesService.StartUpdate();
             return Ok("Update Started.");
         }
         catch (Exception e)
