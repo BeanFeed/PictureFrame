@@ -37,6 +37,9 @@ public class UpdatesService
         if (preferenceModel.ServerAddress[^1] == '/')
             preferenceModel.ServerAddress =
                 preferenceModel.ServerAddress.Remove(preferenceModel.ServerAddress.Length - 1);
+
+        if(!Utils.CheckForInternetConnection(preferenceModel.ServerAddress)) throw new Exception("Server Address Not Reachable.");
+
         if (configuration is null)
         {
             configuration = new SystemConfiguration()
@@ -70,6 +73,9 @@ public class UpdatesService
         if (preferenceModel.ServerAddress[^1] == '/')
             preferenceModel.ServerAddress =
                 preferenceModel.ServerAddress.Remove(preferenceModel.ServerAddress.Length - 1);
+
+        if(!Utils.CheckForInternetConnection(preferenceModel.ServerAddress)) throw new Exception("Server Address Not Reachable.");
+
         if (configuration is null)
         {
             configuration = new SystemConfiguration()
@@ -117,15 +123,16 @@ public class UpdatesService
         int percent = _downloadQueue.PercentComplete;
         string status = _downloadQueue.Status;
 
+
+
+        Dictionary<string, object> statusDict = new Dictionary<string, object>();
+        statusDict.Add("status", status);
+        statusDict.Add("percent", percent);
         if (status == "Complete")
         {
             _downloadQueue.Status = "Idle";
             _downloadQueue.PercentComplete = 0;
         }
-
-        Dictionary<string, object> statusDict = new Dictionary<string, object>();
-        statusDict.Add("status", status);
-        statusDict.Add("percent", percent);
         return statusDict;
     }
 
@@ -161,7 +168,15 @@ public class UpdatesService
         UpdatePreferenceValue? preferenceModel =
             JsonSerializer.Deserialize<UpdatePreferenceValue>(await GetUpdatePreferences());
         if (preferenceModel is null) throw new Exception("Update Preferences Not Found.");
+
+        if (preferenceModel.PreferredBuildNumber == "latest")
+        {
+            var number = await LatestBuildNumber();
+            preferenceModel.ActualBuildNumber = number;
+            await SetUpdatePreferences(preferenceModel);
+        }
         _downloadQueue.QueueTask(async () => await InstallBuild(preferenceModel));
+
     }
 
     public async Task<string> GetChangelog(string buildNumber)
@@ -200,9 +215,10 @@ public class UpdatesService
             var progress = new Progress<float>();
             progress.ProgressChanged += ReportProgress;
 
+
             using (var stream =
                    new FileStream(
-                       Path.Join(Environment.CurrentDirectory, "Builds", $"{preferenceModel.PreferredBuildNumber}.image"),
+                       Path.Join(Environment.CurrentDirectory, "Builds", $"{preferenceModel.ActualBuildNumber}.image"),
                        FileMode.Create, FileAccess.Write, FileShare.None))
                 await client.DownloadDataAsync($"{preferenceModel.ServerAddress}/api/builds/getbuild?buildNumber={preferenceModel.PreferredBuildNumber}",
                     stream, progress);

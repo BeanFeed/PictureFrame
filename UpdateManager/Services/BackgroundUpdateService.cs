@@ -21,7 +21,7 @@ public class BackgroundUpdateService : BackgroundService
         {
             try
             {
-                UpdatePreferenceModel? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceModel>(await _updatesService.GetUpdatePreferences());
+                UpdatePreferenceValue? preferenceModel = JsonSerializer.Deserialize<UpdatePreferenceValue>(await _updatesService.GetUpdatePreferences());
                 if(preferenceModel is null) throw new Exception("Update Preferences Not Found.");
 
                 if (!preferenceModel.AutoUpdate && await _updatesService.IsUpdateAvailable()) await _updatesService.StartUpdate();

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using UpdateManager.Filters;
 using UpdateManager.Models;
 using UpdateManager.Services;
 
@@ -36,7 +37,7 @@ public class UpdatesController : ControllerBase
         try
         {
             string preferences = await _updatesService.GetUpdatePreferences();
-            return Ok(JsonSerializer.Deserialize<UpdatePreferenceModel>(preferences));
+            return Ok(JsonSerializer.Deserialize<UpdatePreferenceValue>(preferences));
         }
         catch (Exception e)
         {
@@ -45,6 +46,7 @@ public class UpdatesController : ControllerBase
     }
 
     [HttpGet]
+    [NetworkAvailable]
     public async Task<IActionResult> GetBuilds()
     {
         try
@@ -58,6 +60,7 @@ public class UpdatesController : ControllerBase
     }
 
     [HttpGet]
+    [NetworkAvailable]
     public async Task<IActionResult> GetChangelog(string? buildNumber)
     {
         try
@@ -72,6 +75,7 @@ public class UpdatesController : ControllerBase
     }
 
     [HttpGet]
+    [NetworkAvailable]
     public async Task<IActionResult> IsUpdateAvailable()
     {
         try
@@ -85,6 +89,7 @@ public class UpdatesController : ControllerBase
     }
     
     [HttpPost]
+    [NetworkAvailable]
     public async Task<IActionResult> StartUpdate(string? buildNumber)
     {
         try
@@ -100,6 +105,7 @@ public class UpdatesController : ControllerBase
     }
 
     [HttpGet]
+    [NetworkAvailable]
     public IActionResult GetUpdateStatus()
     {
         return Ok(_updatesService.GetStatus());
